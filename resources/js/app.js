@@ -9,17 +9,18 @@ import Settings from './components/Settings.vue';
 import Blogs from './components/Blogs.vue';
 import ViewBlogs from './components/ViewBlogs.vue';
 import UBlogView from './components/UBlogView.vue';
+//import nuxt from '/nuxtjs/pages/index.vue';
 import { createApp } from 'vue';
 
 
 
 
 const app = createApp({});
-
+const app1 = createApp({});
 
 app.component('user-dash', UserDashboard);
 
-
+//app1.component('client-side',nuxt);
 const router = createRouter({
     history: createWebHistory(),
     routes: [
@@ -35,3 +36,4 @@ const router = createRouter({
   
   
   app.use(router).mount('#app')
+  //app1.mount('#app1')
