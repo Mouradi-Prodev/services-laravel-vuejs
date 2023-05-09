@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string("name");
             $table->unsignedBigInteger('country_id');
+            $table->boolean('validated')->default(false);
             $table->foreign('country_id')->references('id')->on('countries');
             $table->timestamps();
         });

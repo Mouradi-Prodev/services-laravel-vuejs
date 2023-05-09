@@ -22,7 +22,10 @@ class User extends Authenticatable implements mustVerifyEmail
         'email',
         'password',
     ];
-
+    public function service()
+    {
+        return $this->hasMany(User::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

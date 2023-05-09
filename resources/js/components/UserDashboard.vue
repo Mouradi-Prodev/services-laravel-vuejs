@@ -7,9 +7,9 @@
     </div>
     <nav class="mt-4">
       <router-link to="/addservice" exact class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700">add service</router-link>
-      <router-link to="/ViewServices" class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700">View your Services</router-link>
-      <router-link to="/addBlogs" class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700">Blogs</router-link>
-      <router-link to="/ViewBlogs" class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700">View your Blogs</router-link>
+      <router-link to="/ViewServices" class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700" exact>View your Services</router-link>
+     
+      
       <router-link to="/Settings" class="block px-4 py-2 text-lg font-medium text-white hover:bg-gray-700">Settings</router-link>
     </nav>
   </div>

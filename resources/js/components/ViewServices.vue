@@ -1,36 +1,39 @@
 
 <template>
- 
- <div class="flex flex-wrap">
-  <div v-if="services.length == 0" class="text-center text-gray-500">
+  <div class="services-container">
+    <div class="flex flex-wrap">
+      <div v-if="services.length == 0" class="text-center text-gray-500">
         No services available
       </div>
-  <div v-for="service in services" :key="service.id">
-    <!-- Card component goes here -->
-    
-    <div class="max-w-sm rounded overflow-hidden shadow-lg mx-4 my-2">
-      <div class="px-6 py-4">
-        <div class="font-bold text-xl mb-2">{{service.title}}</div>
-        <p class="text-gray-700 text-base" @click="showdes(service.description)"><b>description(view)</b></p>
-        <p class="text-gray-700 text-base">${{ service.price }}</p>
+      <div class="grid grid-cols-2 p-4 sm:p-6 lg:p-8">
+
+        <a v-for="service in services" :key="service.id" @click.prevent="navigateToService(service.id)"
+          class="max-w-md rounded overflow-hidden shadow-lg mx-4 my-4 hover:scale-105">
+          <img class="w-full h-48 object-cover" :src="service.file" alt="Service image">
+          <div class="px-6 py-4">
+            <div class="font-bold text-xl mb-2">{{ service.title }}</div>
+            <p class="text-gray-700 text-base">{{ service.description }}</p>
+          </div>
+          <div class="px-6 pt-4 pb-2">
+            <span
+              class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 truncate">{{ service.catname }}</span>
+            <span
+              class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 truncate">{{ service.countname }}</span>
+            <span
+              class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 truncate">{{ service.cname }}</span>
+          </div>
+        </a>
+
       </div>
-      <div class="px-6 py-4">
-        <button @click="editService(service)" class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">Edit</button>
-      
-      
-        <button @click="deleteService(service.id)" class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2">Delete</button>
-      </div>
-      
+
     </div>
   </div>
-</div>
-
 </template>
 
 
 <script>
 import axios from 'axios';
-import  Swal  from 'sweetalert2/dist/sweetalert2';
+import Swal from 'sweetalert2/dist/sweetalert2';
 export default {
 
   data() {
@@ -39,17 +42,14 @@ export default {
       serviceData: null,
     }
   },
-  mounted()
-  {
+  mounted() {
     this.fetchservices();
   },
-  methods:{
-    showdes(des) {
-      Swal.fire(
-           "description :"+
-            des
-          )
+  methods: {
+    navigateToService(serviceId) {
+      this.$router.push({ name: 'ServiceView', params: { id: serviceId } });
     },
+
     deleteService(id) {
       Swal.fire({
         title: 'Are you sure?',
@@ -62,44 +62,43 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axios.delete(`/delservice/${id}`)
-        .then(response => {
-          // handle success
-          Swal.fire(
-            'Deleted!',
-            'Your service has been deleted.',
-            'success'
-          )
-          this.fetchservices();
-         
-        })
-        .catch(error => {
-          // handle error
-          Swal.fire({
-            title : 'Error',
-            text : error.response.error
-        })
-          //console.log(error.response.data);
-        });
-          
+            .then(response => {
+              // handle success
+              Swal.fire(
+                'Deleted!',
+                'Your service has been deleted.',
+                'success'
+              )
+              this.fetchservices();
+
+            })
+            .catch(error => {
+              // handle error
+              Swal.fire({
+                title: 'Error',
+                text: error.response.error
+              })
+              //console.log(error.response.data);
+            });
+
         }
       })
-     
+
     },
-    fetchservices()
-    {
+    fetchservices() {
       axios.get("/GetUserServices")
-      .then(response => {
-        this.services = response.data;
-      })
-      .catch(error => {
-        Swal.fire({
-          icon: "error",
-          title: "Error loading services",
+        .then(response => {
+          this.services = response.data;
         })
-      });
+        .catch(error => {
+          Swal.fire({
+            icon: "error",
+            title: "Error loading services",
+          })
+        });
     },
     editService(service) {
-      this.serviceData= service;
+      this.serviceData = service;
       Swal.fire({
         title: "Edit Service",
         html: `
@@ -116,12 +115,7 @@ export default {
                     </label>
                     <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description">${this.serviceData.description}</textarea>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-bold mb-2" for="price">
-                        Price
-                    </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="price" type="number" step="0.01" value="${this.serviceData.price}">
-                </div>
+                
                 <!-- Add other form fields as needed -->
             </form>
         `,
@@ -130,26 +124,36 @@ export default {
         cancelButtonText: "Cancel",
         focusConfirm: false,
         preConfirm: async () => {
-            // Handle form submission and service update here
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
-            const price = document.getElementById('price').value;
+          // Handle form submission and service update here
+          const title = document.getElementById('title').value;
+          const description = document.getElementById('description').value;
 
-            // Send an Axios request to update the service on the server
-            return axios.put(`/editservice/${this.serviceData.id}`, { title, description, price })
-              .then(response => {
-                // Reload the page to show the updated service list
-                this.fetchservices();
+          // Send an Axios request to update the service on the server
+          return axios.put(`/editservice/${this.serviceData.id}`, { title, description })
+            .then(response => {
+              // Reload the page to show the updated service list
+              this.fetchservices();
+              Swal.fire({
+                icon: "success",
+                text: "Updated successfully"
               })
-              .catch(error => {
-                console.error(error);
-                Swal.showValidationMessage(`Error: ${error}`);
-              });
+            })
+            .catch(error => {
+              console.error(error);
+              Swal.showValidationMessage(`Error: ${error}`);
+            });
 
         }
-    });
+      });
 
     },
   }
 }
 </script>
+<style>
+.services-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+</style>

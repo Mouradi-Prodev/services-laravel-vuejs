@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use App\models\Blog;
+use App\models\City;
+use App\models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Validation;
 use Illuminate\Support\Facades\Validator;
@@ -18,13 +20,19 @@ class UserController extends Controller
     public function GetCategories()
     {
         $categories = DB::table('categories')->get();
-        return $categories;
+        $cities = City::all();
+        $data = [
+            'categories' => $categories,
+            'cities' => $cities
+        ];
+        return $data;
     }
     public function storeService(Request $request)
         {
+            //compteur de nombre de services
             $count = DB::table('services')->where("user_id",Auth::user()->id)
             ->count() ;
-            if($count > 2)
+            if($count > 10)
             {
                 return response()->json(['error' => 'You have exceeded the maximum number of services.'], 422);
             }
@@ -34,13 +42,33 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string',
             'description' => 'required|string',
-            'price' => 'required',
             'category_id' => 'required|integer',
             'city' => 'required|string',
-            'country_id' => 'required'
-        ]);
+            'country_id' => 'required',
+            'file' => 'required|image|max:2048', // Limit to 2MB,
+            'category' => 'required|string',
+            'city_id' => 'required|integer'
 
-        // insert city in cities table
+        ]);
+        $city_id_final = $validatedData['city_id'];
+        $cat_id_final = $validatedData['category_id'];
+
+         // Get the uploaded file
+         $file = $request->file('file');
+
+         // Generate a custom file name
+         $fileName = 'service_image_'.uniqid().'.'.$file->getClientOriginalExtension();
+ 
+         // Store the file in the storage/app/public/service_image directory
+         $file->storeAs('public/service_image', $fileName);
+ 
+         // Save the file path in the database or do whatever you need to do with it
+         $filePath = 'storage/service_image/'.$fileName;
+
+         //checking if a new city being suggested
+        if($validatedData['city_id'] == -1 && $validatedData['city'])
+        {
+             // insert city in cities table
         $city = DB::table('cities')->where('name', '=', $validatedData['city'])
         ->where('country_id', '=', $validatedData['country_id'])
         ->first();
@@ -56,16 +84,39 @@ class UserController extends Controller
             // retrieve city id
         $cityId = $city->id;
         }
-         
+        $city_id_final = $cityId;
+        }
+        //checking for a suggested category
+        if($validatedData['category_id'] == -1 && $validatedData['category'])
+        {
+             // insert category in categories table
+        $category = DB::table('categories')->where('name', '=', $validatedData['category'])
+        
+        ->first();
+        if(!$category)
+        {
+            $newcategoryid = DB::table('categories')->insertGetId([
+                "name" => $validatedData['category'],
+            ]);
+            $catId = $newcategoryid;
+        }
+        else{
+            // retrieve city id
+        $catId = $category->id;
+        }
+        $cat_id_final = $catId;
+        }
+       
 
+       
         // insert service in services table
         $service = DB::table("services")->insert([
             "title" => $validatedData['title'],
             "description" => $validatedData['description'],
-            "category_id" => $validatedData['category_id'],
-            "city_id" => $cityId,
+            "category_id" => $cat_id_final,
+            "city_id" => $city_id_final,
             "country_id" =>$validatedData['country_id'],
-            "price" => $validatedData['price'],
+            "file" => $filePath,
             "user_id" => Auth::user()->id
         ]);
 
@@ -78,26 +129,52 @@ class UserController extends Controller
             
             $services = DB::table("services")->where("user_id", "=", Auth::user()->id)
             ->join("cities","services.city_id","=","cities.id")
+            ->join("countries","services.country_id","=","countries.id")
             ->join("categories","services.category_id","=","categories.id")
-            ->select("services.*","categories.name as catname","cities.name as cname")
+            ->select("services.*","categories.name as catname","cities.name as cname","countries.name as countname")
             ->get();
             return $services;
         }
         public function deleteservice($id)
         {
-            $del = DB::table('services')->where('id', $id)->delete();
-            if($del)
-            return response()->json(['success' => "Service deleted"],200);
-            else 
-            return response()->json(['error' => "Error when deleting service"],403);
+           $service = Service::where('user_id',Auth::id())->find($id);
+           $file_path = str_replace('storage','public',$service->file);
+           
+           if(Storage::exists($file_path))
+           {
+            Storage::delete($file_path);
+           }
+           $service->delete();
         }
         public function EditService(Request $request,$id)
         {
-            DB::table('services')->where('id', $id)->update([
-                "title" => $request->title,
-                "price" => $request->price,
-                "description" => $request->description
-            ]);
+             // validate form data
+        $validatedData = $request->validate([
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'image' => 'image|max:2048', // Limit to 2MB,
+        ]);
+        
+            $service = Service::where('user_id',Auth::id())->find($id);
+            $service->title = $request->input('title');
+            $service->description = $request->input('description');
+
+            if ($request->hasFile('image')) {
+                // delete old image if it exists
+                if ($service->file) {
+                    $file_path = str_replace('storage','public',$service->file);
+                    Storage::delete($file_path);
+                }
+                $image = $request->file('image');
+                $imageName = 'service_image_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $image->storeAs('public/service_image', $imageName);
+                $service->file =  'storage/service_image/' . $imageName;
+            
+                
+            }
+            $service->save();
+
+            return response()->json($service);
         }
         public function uploadImage(Request $request)
         {
@@ -324,6 +401,13 @@ class UserController extends Controller
                 Storage::deleteDirectory($directoryPath);
                 $blog->delete();
                 return response()->json(['message' => 'Blog deleted successfully.']);
+            }
+            public function GetServiceView(Request $request)
+            {
+                $service = Service::with('city', 'country')
+                ->where('user_id',Auth::id())->findOrFail($request->params['id']);
+            
+                return $service;
             }
 
 }

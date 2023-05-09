@@ -24,11 +24,10 @@
     <div id="app">
     <nav class="bg-gray-800 text-white">
     <div class="container mx-auto px-4 py-2 flex justify-between items-center">
-      <a href="#" class="text-xl font-bold">
-      <span class="bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 box-decoration-clone hover:box-decoration-slice ">
-  Social<br>
-  Services
-</span></a>
+      <a href="/Services" class="text-xl font-bold">
+     
+      <span class="text-2xl pl-2"><i class="em em-grinning"></i> Services</span>
+</a>
       
      <!-- <button class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">Logout</button>-->
      @auth 
@@ -48,7 +47,7 @@
   
   <!-- Footer -->
   <footer class="bg-gray-200 text-gray-600 text-center py-4">
-    <p>Copyright &copy; 2023 - Mouradi</p>
+    <p>Copyright &copy; 2023 - Mouradi.</p><p>contact the developper:sallah.mouradi19@gmail.com</p>
   </footer>
     </div>
 </body>
