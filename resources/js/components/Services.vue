@@ -1,57 +1,63 @@
 <template>
   <div class="container mx-auto ">
-    <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-x-4 md:space-y-0 overflow-x-auto">
-  <div class="flex items-center">
-    <label class="text-base md:text-lg font-medium mr-2" for="search">Search</label>
-    <input class="border border-gray-400 rounded-md py-2 px-3 text-sm md:text-base" id="search" type="text">
-  </div>
-  
-  <div class="flex items-center">
-    <label class="text-base md:text-lg font-medium mr-2" for="category">Category</label>
-    <select 
-      @change="SelectChanged"
-      v-model="catId"
-      class="border border-gray-400 rounded-md py-2 px-3 text-sm md:text-base"
-      id="category"
-    >
-      <option value="">All</option>
-      <option :value="Cat.id" v-for="(Cat, index) in Categories" :key="index">{{ Cat.name }}</option>
-    </select>
+    <div class="flex flex-col justify-start items-center  bg-white py-6 sm:py-12">
+  <div class="flex items-center justify-center mb-4">
+    <label for="search" class="mr-2 font-medium text-base md:text-lg">Search</label>
+    <input type="text" id="search" class="py-2 px-3 text-sm md:text-base border border-gray-400 rounded-md">
   </div>
 
-  <div class="flex items-center">
-    <label class="text-base md:text-lg font-medium mr-2" for="country">Country</label>
-    <select 
-      @change="SelectChanged"
-      @click="initCity"
-      v-model="countryId"
-      class="border border-gray-400 rounded-md py-2 px-3 text-sm md:text-base"
-      id="country"
-    >
-      <option value="">All</option>
-      <option v-for="(Country, index) in Countries" :value="Country.id" :key="index">{{ Country.name }}</option>
-    </select>
+  <div class="flex flex-wrap items-center justify-center mb-4">
+    <div class="flex items-center mb-2 md:mb-0 md:mr-6">
+      <label for="category" class="mr-2 font-medium text-base md:text-lg">Category</label>
+      <select 
+        id="category" 
+        class="py-2 px-3 text-sm md:text-base border border-gray-400 rounded-md"
+        v-model="catId"
+        @change="SelectChanged"
+      >
+        <option value="">All</option>
+        <option :value="Cat.id" v-for="(Cat, index) in Categories" :key="index">{{ Cat.name }}</option>
+      </select>
+    </div>
+
+    <div class="flex items-center">
+      <label for="country" class="mr-2 font-medium text-base md:text-lg">Country</label>
+      <select 
+        id="country" 
+        class="py-2 px-3 text-sm md:text-base border border-gray-400 rounded-md"
+        v-model="countryId"
+        @change="SelectChanged"
+        @click="initCity"
+      >
+        <option value="">All</option>
+        <option v-for="(Country, index) in Countries" :value="Country.id" :key="index">{{ Country.name }}</option>
+      </select>
+    </div>
   </div>
 
-  <div class="flex items-center">
-    <label class="text-base md:text-lg font-medium mr-2" for="city">City</label>
-    <select 
-      v-model="cityId"
-      @change="SelectChanged"
-      class="border border-gray-400 rounded-md py-2 px-3 text-sm md:text-base"
-      id="city"
-    >
-      <option value="">All</option>
-      <option v-for="(City, index) in filteredCities" :value="City.id" :key="index" :selected="City.id == 1">{{ City.name }}</option>
-    </select>
-  </div>
+  <div class="flex flex-wrap items-center justify-center mb-4">
+    <div class="flex items-center mb-2 md:mb-0 md:mr-6">
+      <label for="city" class="mr-2 font-medium text-base md:text-lg">City</label>
+      <select 
+        id="city" 
+        class="py-2 px-3 text-sm md:text-base border border-gray-400 rounded-md"
+        v-model="cityId"
+        @change="SelectChanged"
+      >
+        <option value="">All</option>
+        <option v-for="(City, index) in filteredCities" :value="City.id" :key="index" :selected="City.id == 1">{{ City.name }}</option>
+      </select>
+    </div>
 
+   
+  </div>
   <div class="flex items-center">
-    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r-lg" type="button">
-      Search
-    </button>
+      <button type="button" class="px-4 py-2 font-bold text-white bg-blue-500 rounded-r-lg hover:bg-blue-700">
+        Search ({{ countRes}})
+      </button>
   </div>
 </div>
+
 
   
   <div>
@@ -98,6 +104,7 @@
     data()
     {
       return {
+        id:null,
         Categories:'',
         Countries:'',
         Cities:'',
@@ -115,6 +122,8 @@
     mounted()
     {
       this.fetchData();
+      
+      console.log(this.$route.params.catId);
     },
     methods:{
       fetchData(){
@@ -130,8 +139,9 @@
         });
       },
       SelectChanged() {
-        //this.$router.push(`/Services-and-Blogs/${this.catId}`);
-        console.log(this.$route.params.id);
+      
+        this.$router.push({ name: 'Services', params: { catId: this.catId } });
+       
         const catId = this.catId;
         const cityId = this.cityId;
         const countryId = this.countryId;
@@ -149,7 +159,7 @@
           filteredServices = filteredServices.filter(service => service.city_id == cityId);
         }
         this.countRes = filteredServices.length;
-        this.Services = filteredServices;
+       // this.Services = filteredServices;
        
       },
       initCity()

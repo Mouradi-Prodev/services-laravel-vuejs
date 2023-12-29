@@ -43,7 +43,7 @@ const router = createRouter({
       },
      
      // {path: '/UBlogView/:id',name:'blog',component: UBlogView,props: true},
-      { path: '/Services', component: Services},
+      { path: '/Services_:catId', component: Services,name:'Services',props: true},
       {path: '/service/:id/:title/:description',component: ServiceDetails},
     ]
   });

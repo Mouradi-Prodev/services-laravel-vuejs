@@ -178,8 +178,12 @@ class UserController extends Controller
         }
         public function uploadImage(Request $request)
         {
+            $user = Auth::user();
             $file = $request->file('image');
-
+            if($user->profile_image_url) {
+                $image_path = str_replace('storage','public',$user->profile_image_url);
+                Storage::delete($image_path);
+            }
             // Generate a unique name for the file
             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
 
@@ -190,7 +194,7 @@ class UserController extends Controller
             $imageUrl = Storage::url('profile_images/' . $fileName);
 
             // Update the user's profile image URL in the database
-            $user = Auth::user();
+            
             $user->profile_image_url = $imageUrl;
             $user->save();
 

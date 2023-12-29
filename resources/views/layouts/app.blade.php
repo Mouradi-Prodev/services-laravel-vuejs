@@ -47,7 +47,7 @@
   
   <!-- Footer -->
   <footer class="bg-gray-200 text-gray-600 text-center py-4">
-    <p>Copyright &copy; 2023 - Mouradi.</p><p>contact the developper:sallah.mouradi19@gmail.com</p>
+    <p>Copyright &copy; 2023 - Mouradi.</p><p>contact the developper for feedback : sallah.mouradi19@gmail.com</p>
   </footer>
     </div>
 </body>

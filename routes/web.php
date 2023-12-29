@@ -23,7 +23,7 @@ Route::get('/', function () {
 Route::get("/Services",function(){
     return view('Services-and-Blogs');
 });
-Route::get("/Services/{id}",function(){
+Route::get("/Services_{id}",function(){
     return view('Services-and-Blogs');
 });
 
